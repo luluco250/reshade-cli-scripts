@@ -1,18 +1,34 @@
 param(
 	[Parameter(Mandatory = $true, Position = 0)]
 	[ValidateSet('32', '64')]
-	[String] $Architecture
+	[String] $Architecture,
+
+	[Parameter(Mandatory = $false, Position = 1)]
+	[String] $Path = $null
 )
 
-$Config = & "$PSCommandPath\..\Get-Config.ps1"
+. "$PSCommandPath\..\Common.ps1"
 
-$platform = switch ($Architecture)
+$Config = Get-Config
+
+if ($Path -eq $null) {
+	$Path = $Config.ReShadeProjectRoot
+}
+
+$Platform = switch ($Architecture)
 {
 	'32' {'32-bit'}
 	'64' {'64-bit'}
 }
 
-Invoke-MsBuild `
-	-Path "$($Config.ReShadeProjectRoot)\ReShade.sln" `
-	-params "/target:Build /property:Configuration=Release;Platform=$platform" `
-	-ShowBuildOutputInCurrentWindow
+try {
+	$repo = [Repository]::From($config.ReShadeRepository)
+	$repo.CreateOrUpdate($Path)
+
+	Invoke-MsBuild `
+		-Path "$($Path)\ReShade.sln" `
+		-params "/target:Build /property:Configuration=Release;Platform=$Platform" `
+		-ShowBuildOutputInCurrentWindow
+} catch {
+	throw
+}

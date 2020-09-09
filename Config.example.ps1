@@ -1,5 +1,6 @@
 @{
 	ReShadeProjectRoot = '..\reshade'
+	ReShadeRepository = 'https://github.com/crosire/reshade'
 	RepositoriesFolder = '..\'
 	Repositories = @(
 		,('https://github.com/crosire/reshade-shaders', 'slim')
